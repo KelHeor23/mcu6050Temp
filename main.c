@@ -1,33 +1,29 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
-#include <string.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <linux/i2c-dev.h>
 #include "mpu6050.h"
 
-int main()
+int main(void)
 {
+    // Замените путь, если у вас i2c-1
     mpu6050_t *m = mpu6050_init("/dev/i2c-0");
-    if (!m)
-    {
-        printf("Ошибка инициализации MPU6050\n");
+    if (!m) {
+        fprintf(stderr, "MPU6050 init failed\n");
         return 1;
     }
 
-    int16_t gx = 0, gy = 0, gz = 0;
-    int16_t ax = 0, ay = 0, az = 0;
+    // Пример: убедимся, что чип «проснулся»
+    // (mpu6050_init уже делает write в PWR_MGMT_1 = 0x00)
+    // При желании можно выставить DLPF:
+    // mpu6050_set_config(m, 0x03);
 
-    while (1)
-    {
-        mpu6050_get_gyro_raw(m, &gx, &gy, &gz);
+    printf("ax,ay,az,gx,gy,gz\n");
+    while (1) {
+        int16_t ax, ay, az, gx, gy, gz;
         mpu6050_get_accl_raw(m, &ax, &ay, &az);
-
+        mpu6050_get_gyro_raw(m, &gx, &gy, &gz);
         printf("%d,%d,%d,%d,%d,%d\n", ax, ay, az, gx, gy, gz);
-
-        usleep(100000); // 100ms delay
+        fflush(stdout);
+        usleep(100000); // 100 ms
     }
 
     mpu6050_cleanup(m);

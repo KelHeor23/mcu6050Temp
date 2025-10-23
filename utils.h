@@ -5,38 +5,20 @@
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
-#include <unistd.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+// Печать ошибки с errno
+#define prerr(fmt, ...) \
+do { fprintf(stderr, "[ERR] " fmt " (%s)\n", ##__VA_ARGS__, strerror(errno)); } while (0)
 
-////////////////////////////////////////////
+    // Безопасный wrapper: логирует, если res == -1 (errno уже установлен)
+    int sysguard(int res, char *msg);
 
-
-#define prdbg(x, ...) (printf("\x1b[33mdebug:: " x "\x1b[0m\n", ##__VA_ARGS__))
-#define prerr(x, ...) (printf("\x1b[31merror:: " x "\x1b[0m\n", ##__VA_ARGS__))
-#define prwar(x, ...) (printf("\x1b[36mwarng:: " x "\x1b[0m\n", ##__VA_ARGS__))
-#define UNUSED(x) ((void)x);
-
-
-////////////////////////////////////////////
-
-
-// wraps system calls to show a message on error (when res is -1).
-int sysguard(int res, char *msg);
-
-
-////////////////////////////////////////////
-
-
-// get time in seconds up to nano seconds
+// Время в секундах с наносекундной точностью
 double get_time_sec();
-
-
-////////////////////////////////////////////
-
 
 #ifdef __cplusplus
 }

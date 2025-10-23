@@ -12,7 +12,7 @@ if(NOT I2C_LIB)
     message(FATAL_ERROR "libi2c not found. Install libi2c-dev (Debian/Ubuntu) or i2c-tools (Arch).")
 endif()
 
-target_link_libraries(mcu6050Temp ${I2C_LIB})
+target_link_libraries(mcu6050Temp ${I2C_LIB} m)
 
 include(GNUInstallDirs)
 install(TARGETS mcu6050Temp

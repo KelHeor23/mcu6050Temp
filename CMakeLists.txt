@@ -4,6 +4,7 @@ project(mcu6050Temp LANGUAGES C)
 
 add_executable(mcu6050Temp main.c
     mpu6050.h mpu6050.c
+    utils.h utils.c
 )
 
 include(GNUInstallDirs)

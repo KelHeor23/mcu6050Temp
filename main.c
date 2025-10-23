@@ -10,16 +10,35 @@ int main(void)
         return 1;
     }
 
-    printf("ax,ay,az,gx,gy,gz\n");
+    mpu6050_scale_t S = {0};
+    mpu6050_bias_t  B = {0};
+
+    mpu6050_read_and_print_scales(m, &S);
+
+    // 3 секунды калибровка в покое, 100 Гц
+    if (mpu6050_calibrate_bias(m, &S, 3.0, 100.0, &B) != 0) {
+        fprintf(stderr, "Calibration failed\n");
+        mpu6050_cleanup(m);
+        return 1;
+    }
+
+    printf("ax_ms2,ay_ms2,az_ms2,gx_dps,gy_dps,gz_dps\n");
     while (1) {
-        int16_t ax, ay, az, gx, gy, gz;
-        mpu6050_get_accl_raw(m, &ax, &ay, &az);
-        mpu6050_get_gyro_raw(m, &gx, &gy, &gz);
-        printf("ax = %.2f ay = %.2f, az = %.2f gx = %.2f gy = %.2f gz = %.2f\n",
-            (float)ax / 16384, (float)ay / 16384, (float)az / 16384,
-            (float)gx / 131, (float)gy / 131, (float)gz / 131);
+        int16_t rax, ray, raz, rgx, rgy, rgz;
+        double ax, ay, az, gx, gy, gz;
+
+        mpu6050_get_accl_raw(m, &rax, &ray, &raz);
+        mpu6050_get_gyro_raw(m, &rgx, &rgy, &rgz);
+
+        mpu6050_convert_raw_si(&S, rax, ray, raz, rgx, rgy, rgz,
+                               &ax, &ay, &az, &gx, &gy, &gz);
+
+        // Применяем bias: после этого в покое аксель ~0 (g удалена), гира ~0
+        mpu6050_apply_bias(&B, &ax, &ay, &az, &gx, &gy, &gz);
+
+        printf("%.4f,%.4f,%.4f,%.4f,%.4f,%.4f\n", ax, ay, az, gx, gy, gz);
         fflush(stdout);
-        usleep(100000); // 100 ms
+        usleep(10000); // 100 Гц
     }
 
     mpu6050_cleanup(m);

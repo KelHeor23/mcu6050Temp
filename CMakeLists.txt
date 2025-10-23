@@ -7,6 +7,13 @@ add_executable(mcu6050Temp main.c
     utils.h utils.c
 )
 
+find_library(I2C_LIB i2c)
+if(NOT I2C_LIB)
+    message(FATAL_ERROR "libi2c not found. Install libi2c-dev (Debian/Ubuntu) or i2c-tools (Arch).")
+endif()
+
+target_link_libraries(mcu6050Temp ${I2C_LIB})
+
 include(GNUInstallDirs)
 install(TARGETS mcu6050Temp
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
